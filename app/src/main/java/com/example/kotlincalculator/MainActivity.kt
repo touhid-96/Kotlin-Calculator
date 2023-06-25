@@ -3,28 +3,83 @@ package com.example.kotlincalculator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
+import android.widget.Button
+import com.example.kotlincalculator.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private var canAddOperationAction = false
+    private var canAddOperation = false
+    private var canAddDecimal = true
+    private lateinit var binding: ActivityMainBinding
 
-    val workingTV = findViewById<TextView>(R.id.working_textview)
-    val resultsTV = findViewById<TextView>(R.id.results_textview)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
     }
 
     fun allClearAction(view: View) {
-        workingTV.text = ""
-        resultsTV.text = ""
+        binding.workingTextview.text = ""
+        binding.resultsTextview.text = ""
     }
 
     fun backspaceAction(view: View) {
-        val length = workingTV.length()
+        val length = binding.workingTextview.length()
         if (length > 0) {
-            workingTV.text = workingTV.text.subSequence(0, length - 1)
+            binding.workingTextview.text = binding.workingTextview.text.subSequence(0, length - 1)
         }
+    }
+
+    fun numberAction(view: View) {
+        if (view is Button) {
+            if (view.text == ".") {
+                if (canAddDecimal) {
+                    binding.workingTextview.append(view.text)
+                }
+                canAddDecimal = false
+            } else {
+                binding.workingTextview.append(view.text)
+            }
+            canAddOperation = true
+        }
+    }
+
+    fun operationAction(view: View) {
+        if (view is Button && canAddOperation) {
+            binding.workingTextview.append(view.text)
+            canAddOperation = false
+            canAddDecimal = true
+        }
+    }
+
+    fun equalsAction(view: View) {
+        binding.resultsTextview.text = calculateResults()
+    }
+
+    private fun calculateResults(): String {
+
+        return ""
+    }
+
+    private  fun digitOparators(): MutableList<Any> {
+        val list = mutableListOf<Any>()
+        var currentDigit = ""
+
+        for(char in binding.workingTextview.text) {
+            if (char.isDigit() || char == '.') {
+                currentDigit = currentDigit + char
+            } else { //jodi operator pai
+                list.add(currentDigit.toFloat())
+                currentDigit = ""
+                list.add(char)
+            }
+        }
+
+        if (currentDigit != "") { //last operand
+            list.add(currentDigit.toFloat())
+        }
+
+        return list
     }
 }
